@@ -1,0 +1,41 @@
+name: Build Winax Binary
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest # Use the latest Windows runner, which has build tools and admin rights
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.19.0' # Use a compatible Node.js version
+
+      - name: Install dependencies and build winax
+        run: |
+          npm install winax
+          # The above 'npm install' command will trigger node-gyp compilation
+          # on the GitHub Actions runner environment.
+
+      - name: Locate and list build artifacts
+        run: |
+          # Command to list the generated files to ensure they exist
+          dir node_modules\winax\build\Release
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: winax-binary-build
+          path: |
+            node_modules\winax\build\Release\*.node
+            # Include other necessary files if any are generated
