@@ -1,0 +1,29 @@
+<html>
+    <script>
+        function handleSubmit(e) {
+            e.preventDefault();
+            console.log(new FormData(e.target));
+            fetch('http://localhost:3000', {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(new FormData(e.target).entries())),
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            });
+            return false;
+        }
+    </script>
+    <body>
+        <form onsubmit="return handleSubmit(event)">
+            <input type="text" name="DD_UN" placeholder="Defender Data Username"/><br/>
+            <input type="password" name="DD_PW" placeholder="Defender Data Password"/><br/>
+            <br/>
+            <input type="text" name="S_JIC_UN" placeholder="Superior Court JIC Username"/><br/>
+            <input type="password" name="S_JIC_PW" placeholder="Superior Court JIC Password"/><br/>
+            <br/>
+            <input type="text" name="F_JIC_UN" placeholder="Family Court JIC Username"/><br/>
+            <input type="password" name="F_JIC_PW" placeholder="Family Court JIC Password"/><br/>
+            <button type="submit">Submit</button>
+        </form>
+    </body>
+</html>

@@ -1,0 +1,36 @@
+rem // Log On
+lookfor "JIC"
+type "jic"
+key "enter"
+lookfor "LOGONID: ===>"
+type "jdefwrm"
+key "enter"
+varprompt "pw, Password, hide"
+type "%pw%"
+key "enter"
+if (!search, "Signon OK, 240/400")
+    message "login error"
+    exit ""
+endif ""
+
+rem // Enter Application
+type "jic"
+key "enter"
+type "x"
+key "enter"
+type "1"
+key "enter"
+
+rem // Access Attorney Schedules and Set Date Range
+type "as"
+key "enter"
+key "tab"
+key "tab"
+type "$SDATE"
+type "$EDATE"
+cursor "21/21"
+
+$ATTYS
+
+rem // Exit
+closeall

@@ -1,0 +1,25 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg { fill: #1E73BE; rx: 12; ry: 12; }
+      .label { fill: #ffffff; font-family: "Segoe UI", Roboto, Arial, sans-serif; font-weight: 700; font-size: 48px; dominant-baseline: middle; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Blue background -->
+  <rect width="120" height="120" rx="20" class="bg"/>
+
+  <!-- Door (centered) -->
+  <line x1="35" y1="25" x2="85" y2="25" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <line x1="35" y1="25" x2="35" y2="40" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <line x1="35" y1="80" x2="35" y2="95" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <line x1="85" y1="25" x2="85" y2="95" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <line x1="35" y1="95" x2="85" y2="95" stroke="white" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Arrow shaft (extended to meet point) -->
+  <line x1="60" y1="60" x2="10" y2="60" stroke="white" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Arrowhead (inner endpoints fixed at y = 60 ± 10) -->
+  <line x1="25" y1="45" x2="10" y2="60" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <line x1="25" y1="75" x2="10" y2="60" stroke="white" stroke-width="6" stroke-linecap="round"/>
+</svg>
