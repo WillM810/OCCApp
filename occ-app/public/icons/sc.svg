@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="SC Icon">
+  <defs>
+    <style>
+      .bg { fill: #1E73BE; rx: 12; ry: 12; }
+      .label { fill: #ffffff; font-family: "Segoe UI", Roboto, Arial, sans-serif; font-weight: 700; font-size: 48px; dominant-baseline: middle; text-anchor: middle; }
+    </style>
+  </defs>
+  
+  <rect class="bg" x="0" y="0" width="120" height="120" rx="12" ry="12"/>
+  <text class="label" x="60" y="60">SC</text>
+</svg>

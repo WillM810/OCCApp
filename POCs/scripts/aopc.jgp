@@ -1,0 +1,53 @@
+rem // Log On
+lookfor "CJIS1"
+type "cjis1"
+key "enter"
+lookfor "LOGONID: ===>"
+type "jdefwrm"
+key "enter"
+varprompt "pw, Password, hide"
+type "%pw%"
+key "enter"
+if (!search, "LAST SYSTEM ACCESS, 240/320")
+    message "login error"
+    exit ""
+endif ""
+
+rem // Enter Application
+type "menu"
+key "enter"
+type "x"
+key "enter"
+lookfor "Criminal Justice Information System"
+key "enter"
+lookfor "Printer Selection"
+type "8"
+key "enter"
+
+rem // Access Case Inquiry
+type "1"
+key "enter"
+type "1"
+key "enter"
+
+rem // lookup duc
+type "$DUC"
+key "enter"
+
+rem // get AOPC
+lookfor "Case Display Select"
+cursor "14/19"
+type "x"
+key "enter"
+
+rem // save AOPC to file
+lookfor "Complaint and Warrant"
+screentodisk "$AOPC_PATH"
+key "enter"
+dowhile (!search, "Case Display Select, 30/50")
+    appendtodisk "$AOPC_PATH"
+    key "enter"
+endwhile
+
+rem // Exit
+closeall

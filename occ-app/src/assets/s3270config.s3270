@@ -1,0 +1,8 @@
+s3270.termName: IBM-3278-2-E
+s3270.codePage: cp037
+s3270.port: 992
+s3270.reconnect: true
+s3270.traceFile: trace_s3270.txt
+s3270.trace: true
+s3270.hostname: L:DoverP1.dti.state.de.us 
+s3270.blankFill: true
