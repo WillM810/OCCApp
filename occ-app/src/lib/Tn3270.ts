@@ -109,23 +109,3 @@ export class Tn3270 {
             return 'fail';
         }
 }
-
-// (async function() {
-//     const client = await Tn3270.connect();
-//     await client.runCommands([
-//         `String("jic")`,
-//         `Enter()`,
-//         `String("JDEFWRM")`,
-//         `Tab()`,
-//         `String("${process.env.JIC_PASS}")`,
-//         `Enter()`,
-//         `String("jic")`,
-//         `Enter()`,
-//         `String("x")`,
-//         `Enter()`,
-//         `String("1")`,
-//         `Enter()`,
-//     ]);
-//     const reply = await client.read();
-//     console.log(reply!.join('\n'));
-// })()

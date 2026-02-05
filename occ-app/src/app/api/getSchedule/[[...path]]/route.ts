@@ -1,8 +1,11 @@
 import { decrypt, JICPayload } from "@/lib/session";
 import { Tn3270 } from "@/lib/Tn3270";
+import { convertDateJIC } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
+import React from "react";
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ path?: string[] }> }) {
+    const attyId = (await params).path?.[0] ?? '4447';
     const authCookie = request.cookies.get('S_JIC')?.value as string;
     if (!authCookie) return NextResponse.json({}, { status: 401 });
 
@@ -11,6 +14,8 @@ export async function GET(request: NextRequest) {
 
     const client = await Tn3270.connect();
     if (!await client.login('jic', authData.user, authData.pw)) return NextResponse.json({}, { status: 401 });
+    const fromDate = convertDateJIC(new Date());
+    const toDate = convertDateJIC(new Date(Date.now() + (365.25 * 24 * 60 * 60 * 1000)))
     await client.runCommands([
         `String("jic")`,
         `Enter()`,
@@ -20,10 +25,10 @@ export async function GET(request: NextRequest) {
         `Enter()`,
         `String("as")`,
         `Enter()`,
-        `String("003944")`,
+        `String("00${attyId}")`,
         `Tab()`,
-        `String("11182025")`,
-        `String("11182026")`,
+        `String("${fromDate}")`,
+        `String("${toDate}")`,
         `Enter()`
     ]);
 

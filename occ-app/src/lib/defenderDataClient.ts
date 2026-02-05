@@ -153,7 +153,16 @@ export class DefenderDataClient {
 
         const resData = await httpsRequest(requestOptions, JSON.stringify(payload));
         if (resData.body.toString('utf8') === 'Improper or outdated credentials!') throw { error: { message: 'Expired credentials' }, status: { status: 401 } };
-        if (resData.statusCode !== 200) throw { error: { message: `Received server response code: ${resData.statusCode}` }, status: { status: 500 } };
+        if (resData.statusCode !== 200)
+            throw {
+                error: {
+                    message: `DD: Received server response code: ${resData.statusCode}`,
+                    payload: JSON.stringify(payload, null, 2),
+                    requestOptions,
+                    headers: requestOptions.headers
+                },
+                status: { status: 500 }
+            };
         return resData;
     }
 
@@ -316,7 +325,7 @@ export class DefenderDataClient {
         ) as DDBasicResult[];
 
         const attorneys = jsonData
-            .filter(caseRow => !caseRow.Attorney.includes('UNASSIGNED') && caseRow.Status !== 'Closed')
+            .filter(caseRow => !caseRow.Attorney.includes('UNASSIGNED'))
             .reduce((p, c) => {
                 p[c.Attorney] = [...(p[c.Attorney] || []), `${c.DUC}(${c.Type[0]}/${c.Status})`];
                 return p;

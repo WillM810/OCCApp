@@ -14,8 +14,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: 'Invalid JIC login cookie' }, { status: 401 });
 
     const client = await Tn3270.connect();
-    if (!await client.login('jic', authData.user, authData.pw))
-        return NextResponse.json({ message: 'JIC login failed' }, { status: 401 });
+    const loginStatus = await client.login('jic', authData.user, authData.pw);
+    if (loginStatus === 'fail' || loginStatus === 'logged')
+        return NextResponse.json({ message: 'JIC login failed', loginStatus }, { status: 401 });
 
     const { ducs, court } = await request.json() as { ducs: string[], court: 'F' | 'S' | 'C' };
     await client.runCommands([
@@ -36,7 +37,6 @@ export async function POST(request: NextRequest) {
 
     const caseInfoScreen = await client.read();
 
-    // TODO 404 missing cases
     if (caseInfoScreen.some(l => l.includes('This Case Was Not Found For This Court.'))) {
         await client.quit();
         return NextResponse.json({ message: 'missing' }, { status: 404 });
@@ -50,14 +50,13 @@ export async function POST(request: NextRequest) {
     ]);
 
     const caseScreens = await client.read();
-    const sbi = caseScreens.find(l => /\| *SBI \d/.test(l))?.match(/SBI (\d{8})/)![1]!;
-    console.log(sbi, caseScreens);
+    const sbi = caseScreens.find(l => /\| *SBI [\dT]/.test(l))?.match(/SBI ([\dT]\d{7})/)![1]!;
     while (!caseScreens.some(l => l.includes('*** End of Data ***'))) {
         await client.sendCommand('PF(8)');
         caseScreens.push(...(await client.read()));
     }
 
-    const caseData = caseScreens.filter(l => /\| \d{10} /.test(l))?.map(l => l.match(/\| (.*) \|/)?.[1].trim());
+    const caseData = caseScreens.filter(l => /\| \d{10}\s*[FSC]/.test(l))?.map(l => l.match(/\| (.*) \|/)?.[1].trim());
     const caseJson = caseData.map(l => {
         const parts = l?.match(/(\d{10})\s*([FSC])\s*(\w*)\s*(\w*)\s*/);
         return {
@@ -88,6 +87,9 @@ export async function POST(request: NextRequest) {
         ]);
 
         const caseDetail = await client.read();
+
+        if (caseDetail.some(l => l.includes('This Case Was Not Found For This Court.'))) return augmentedCaseData;
+        if (caseDetail.some(l => l.includes('Defendant Individual Index Record Not Found.'))) return augmentedCaseData;
         currentCase.sentenced = /Sentence\s*\d{8}/.test(caseDetail.find(l => l.includes('Sentence'))!);
         currentCase.declared = ddCases.some((ddCase) => ddCase.lda_nbr === currentCase.duc) || ducs.includes(currentCase.duc!);
 
@@ -113,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     const activeJson = notClosedCaseJson.filter(c => !c.sentenced || ducs.includes(c.duc!));
     
-    const aopcClient = await Tn3270.connect();
+    let aopcClient = await Tn3270.connect();
     if (!await aopcClient.login('cjis1', authData.user, authData.pw))
         return NextResponse.json({ message: 'CJIS1 login failed'}, { status: 401 });
 
@@ -159,18 +161,44 @@ export async function POST(request: NextRequest) {
         
         const aopcScreen = [] as string[];
         for (
-            let nextScreen;
-            !(nextScreen = await aopcClient.read()).some(l => l.includes('Case Display Select'));
-            await aopcClient.sendCommand('Enter()')
+            let nextScreen, screenCount = 0;
+            !(nextScreen = await aopcClient.read()).some(l => l.includes('Case Display Select')) && screenCount < 100;
+            await aopcClient.sendCommand('Enter()'), screenCount++
         ) aopcScreen.push(...nextScreen);
         
-        await aopcClient.sendCommand('PF(9)');
-
-        currentCase.aopcScreen = aopcScreen.length ? aopcScreen : [ 'AOPC not found.' ];
+        if (aopcScreen.slice(-20, -1).some(l => !l.trim().match(/\??/))) {
+            await aopcClient.sendCommand('PF(9)');
+            currentCase.aopcScreen = aopcScreen.length ? aopcScreen : [ 'AOPC not found.' ];
+        } else {
+            aopcClient = await resetClient(aopcClient, authData);
+            currentCase.aopcScreen = aopcScreen.map(l => l.match(/^\s*\??\s*$/) ? '' : l).join('\n').trim().split('\n');
+        }
         return caseDataWithAOPC;
     }, Promise.resolve([] as any[]));
 
-    aopcClient.quit();
+    await aopcClient.quit();
 
     return NextResponse.json({ sbi, clientName, caseJson, notClosedCaseJson, activeJson, ddCases });
+}
+
+async function resetClient(client: Tn3270, authData: JICPayload) {
+    await client.quit();
+    const nClient = await Tn3270.connect(true);
+    await nClient.login('cjis1', authData.user, authData.pw);
+    
+    await nClient.runCommands([
+        `String("menu")`,
+        `Enter()`,
+        `String("x")`,
+        `Enter()`,
+        `Enter()`,
+        `String("8")`,
+        `Enter()`,
+        `String("1")`,
+        `Enter()`,
+        `String("1")`,
+        `Enter()`,
+    ]);
+
+    return nClient;
 }

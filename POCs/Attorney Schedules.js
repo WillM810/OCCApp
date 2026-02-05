@@ -29,6 +29,7 @@ const attorneyData = [
         'emails': [
             'aporter@bentonshockleylaw.com',
             'speyton@bentonshockleylaw.com',
+            'cphillips@bentonshockleylaw.com',
         ]
     }, {
         'barId': '002235',
@@ -56,12 +57,13 @@ const attorneyData = [
         'name': 'Angelica Mamani',
         'emails': [
             'amamani@delawarelaw.com',
+            'llambert@delawarelaw.com',
         ]
     }, {
         'barId': '004447',
         'name': 'Ron Poliquin',
         'emails': [
-            'ronpoliquin@gmail.com',
+            'ron@poliquinfirm.com',
             'tatiyana@poliquinfirm.com',
             'morgan@poliquinfirm.com',
         ]
@@ -77,7 +79,6 @@ const attorneyData = [
         'emails': [
             'amit@georgevyas.com',
             'marla@georgevyas.com',
-            'christina@georgevyas.com',
         ]
     }, {
         'barId': '003263',

@@ -6,23 +6,12 @@ import { join } from "path";
 import { readFile, unlink, writeFile } from "fs/promises";
 import { promisify } from "util";
 import { execFile } from "child_process";
+import { attorneyData } from "@/lib/attorneyEmails";
 
 const execFileAsync = promisify(execFile);
 const QPDF = "C:\\Users\\william.mcvay\\Downloads\\OCCApp\\qpdf\\bin\\qpdf.exe";
 
-export const barIdMap = {
-    '4447': 'Ron Poliquin',
-    '7013': 'Amit Vyas',
-    '3263': 'Scott Wilson',
-    '3547': 'Chris Tease',
-    '7231': 'Angelica Mamani',
-    '2542': 'Bob Bria',
-    '5092': 'Adam Windett',
-    '2235': 'Kevin Howard',
-    '5947': 'Alicia Porter',
-    '5613': 'Zach George',
-    '3944': 'Tom Donovan',
-} as { [k: string]: string; };
+export const barIdMap = Object.fromEntries(attorneyData.map(atty => [atty.barId, atty]));
 
 function parsePdf(data: ArrayBuffer): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -36,24 +25,34 @@ function parsePdf(data: ArrayBuffer): Promise<any> {
 }
 
 export async function POST(request: NextRequest) {
-    const url = new URL(request.url);
-    const barId = url.searchParams.get('barId')!;
-    const fileBuffer = await request.arrayBuffer();
+    const { barId, court, conflictSheetArrayBuffer, duc } = await request.json();
+    const modifiedBytes = await modifyConflictPdf(barId, court, conflictSheetArrayBuffer, duc)
 
-    const pdfData = await parsePdf(fileBuffer);
+    return new NextResponse(Buffer.from(modifiedBytes), {
+        headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': 'inline; filename="edited.pdf"'
+        }
+    });
+}
+
+export async function modifyConflictPdf(barId: string, court: string, conflictSheetArrayBuffer: string, duc: string) {
+    const fileBuffer = Buffer.from(conflictSheetArrayBuffer, 'base64');
+
+    const pdfData = await parsePdf(fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength));
     const page = pdfData.Pages[0];
     
     const nameTextObj = page.Texts.find((t: any) =>
         t.R.some((r: any) => decodeURIComponent(r.T).includes('ATTORNEY:')));
 
-    if (!nameTextObj) return NextResponse.json({ error: `Text not found: ${'ATTORNEY:'}`}, { status: 404 });
+    if (!nameTextObj) throw new Error(`Text not found: ${'ATTORNEY:'}`);
     const nameX = nameTextObj.x;
     const nameY = nameTextObj.y;
 
     const bufferedFile = Buffer.from(fileBuffer);
     
-    const inputFile = join(tmpdir(), `input-${Date.now()}.pdf`);
-    const outputFile = join(tmpdir(), `output-${Date.now()}.pdf`);
+    const inputFile = join(tmpdir(), `input-${Date.now()}-${duc}.pdf`);
+    const outputFile = join(tmpdir(), `output-${Date.now()}-${duc}.pdf`);
     await writeFile(inputFile, bufferedFile);
     await execFileAsync(QPDF, ['--decrypt', inputFile, outputFile]);
     const decryptedBuffer = await readFile(outputFile);
@@ -65,7 +64,7 @@ export async function POST(request: NextRequest) {
     const scaleX = firstPage.getSize().width / page.Width;
     const scaleY = firstPage.getSize().height / page.Height;
 
-    firstPage.drawText(barIdMap[barId], {
+    firstPage.drawText(barIdMap[barId].name, {
         x: (nameX * scaleX) + 70,
         y: firstPage.getSize().height - (nameY * scaleY) - 10,
         size: 12,
@@ -81,7 +80,7 @@ export async function POST(request: NextRequest) {
         color: rgb(0, 0, 0)
     });
 
-    firstPage.drawText('Thomas Donovan', {
+    if (court !== 'C') firstPage.drawText('Thomas Donovan', {
         x: (nameX * scaleX) + 40,
         y: firstPage.getSize().height - (nameY * scaleY) - 32,
         size: 12,
@@ -89,7 +88,7 @@ export async function POST(request: NextRequest) {
         color: rgb(0, 0, 0)
     });
 
-    firstPage.drawText(new Date().toLocaleDateString(), {
+    if (court !== 'C') firstPage.drawText(new Date().toLocaleDateString(), {
         x: (nameX * scaleX) + 400,
         y: firstPage.getSize().height - (nameY * scaleY) - 32,
         size: 12,
@@ -102,10 +101,5 @@ export async function POST(request: NextRequest) {
     await unlink(inputFile);
     await unlink(outputFile);
 
-    return new NextResponse(Buffer.from(modifiedBytes), {
-        headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': 'inline; filename="edited.pdf"'
-        }
-    });
+    return modifiedBytes;
 }

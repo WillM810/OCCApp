@@ -44,6 +44,7 @@ export type ConflictResponse = {
   sbi: string;
   clientName: string;
   activeJson: ConflictCase[];
+  court: string;
 }
 
 export type ConflictEmail = FieldsData & {
@@ -94,9 +95,9 @@ export default function Home() {
     setConflictResponse(undefined);
   }
 
-  async function testSchedule() {
+  async function getSchedule() {
     resetPage();
-    const scheduleResponse = await fetch('/api/testSchedule');
+    const scheduleResponse = await fetch('/api/getSchedule');
     const scheduleData = await scheduleResponse.json();
 
     setDisplayContent(scheduleData);
@@ -118,17 +119,12 @@ export default function Home() {
       const reader = new MsgReader(buffer);
       const data = reader.getFileData();
       const duc = /\d{10}/.exec(data.body!)![0]
-      const clientName = /: ([A-Z, ]*?) \d{10}/.exec(data.body!)![1].replace(',', ', ');
+      const clientName = /: ([A-Za-z, \-\']*?) \d{10}/.exec(data.body!)![1].replace(',', ', ');
       const conflictSheetArrayBuffer = reader.getAttachment(data.attachments![0]).content as Uint8Array<ArrayBuffer>;
       
       return { ...data, duc, clientName, fileName: file.name, conflictSheetArrayBuffer };
     }));
-
-    console.log(
-      msgData,
-      URL.createObjectURL(new Blob([msgData[0].conflictSheetArrayBuffer], { type: 'application/pdf' })),
-      `${msgData[0].clientName} - ${msgData[0].duc}.pdf`
-    );
+    
     setConflictEmails(msgData);
     setConflictCaseNumbers(msgData.map(msg => msg.duc).join(','));
     setConflictClientName(msgData[0].clientName);
@@ -162,6 +158,7 @@ export default function Home() {
     const conflictData = Object.fromEntries(new FormData(e.target as HTMLFormElement).entries()) as ConflictData;
     conflictData.ducs = conflictData.ducs.replaceAll(' ', ',')
     const conflictPayload: ConflictPayload = { ducs: (conflictData.ducs).split(',').filter(d => d).map(duc => duc.trim()), court: conflictData.court };
+
     const conflictResponse = await fetch('/api/conflict', {
       method: 'POST',
       body: JSON.stringify(conflictPayload),
@@ -169,11 +166,16 @@ export default function Home() {
         'Content-type': 'application/json'
       }
     });
-    setConflictEnabled(true);
-    if (!conflictResponse.ok) return;
 
-    const conflictList = await conflictResponse!.json() as ConflictResponse;
-    setConflictResponse(conflictList);
+    setConflictEnabled(true);
+    if (!conflictResponse.ok) {
+      const { message, loginStatus } = await conflictResponse.json();
+      console.error(message, loginStatus);
+      return;
+    }
+
+    const conflictList = await conflictResponse.json() as ConflictResponse;
+    setConflictResponse({ ...conflictList, court: conflictData.court });
   }
 
   async function unassignedCases() {
@@ -202,7 +204,7 @@ export default function Home() {
             loginState.sc && 
               <button
                 className="w-1/4 h-10 bg-blue-600 text-white p-2 rounded-md font-semibold hover:bg-blue-700 transition duration-150"
-                onClick={testSchedule}
+                onClick={getSchedule}
               >
                 Test Schedule
               </button>
@@ -292,7 +294,7 @@ export default function Home() {
           />
         }
         { (displayContent.length || '') &&
-          <>{ displayContent.map((l, i) => <span className="block font-mono" key={i}>{l}</span>) }</>
+          <>{ displayContent.map((l, i) => <span className="block font-mono whitespace-pre-wrap" key={i}>{l}</span>) }</>
         }
       </main>
       
