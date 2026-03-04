@@ -4,7 +4,7 @@ import fs from 'fs';
 const qwsClientPath = '"c:\\Program Files (x86)\\QWS3270 Secure\\QWS3270s.exe"';
 const templatePath = process.env.USERPROFILE + '\\Downloads\\OCCApp\\POCs\\scripts\\schedules.jgp';
 const scriptPath = process.env.USERPROFILE + '\\Downloads\\OCCApp\\POCs\\scripts\\script.jgp';
-const tSchedulePath = process.env.USERPROFILE + '\\Downloads\\OCCApp\\data\\Schedules\\';
+const tSchedulePath = process.env.USERPROFILE + '\\Downloads\\OCCApp\\POCs\\data\\Schedules\\';
 const schedulePath = process.env.USERPROFILE + '\\OneDrive - STATE OF DELAWARE\\Attorney Schedules';
 
 const attorneyData = [

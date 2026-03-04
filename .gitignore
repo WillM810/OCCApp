@@ -54,3 +54,5 @@ next-env.d.ts
 /*.eml
 /*.png
 /occ-app/*.txt
+
+/POCs/data
