@@ -132,6 +132,14 @@ export const attorneyData = [
             '"Jordan Davis" <jordan.davis@schwartzandschwartz.com>',
             '"Raisa Vargas" <raisa.vargas@schwartzandschwartz.com>'
         ]
+    }, {
+        'barId': '7556',
+        'name': 'Camille Collins',
+        'schedule': false,
+        'emails': [
+            '"Camille Collins" <camille.collins@schwartzandschwartz.com>',
+            '"Kenneth Young" <ken.young@schwartzandschwartz.com>'
+        ]
     }
 ];
 
