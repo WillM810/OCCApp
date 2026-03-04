@@ -64,21 +64,39 @@ export async function modifyConflictPdf(barId: string, court: string, conflictSh
     const scaleX = firstPage.getSize().width / page.Width;
     const scaleY = firstPage.getSize().height / page.Height;
 
-    firstPage.drawText(barIdMap[barId].name, {
-        x: (nameX * scaleX) + 70,
-        y: firstPage.getSize().height - (nameY * scaleY) - 10,
-        size: 12,
-        font,
-        color: rgb(0, 0, 0)
-    });
+    if (barId !== '0000') {
+        firstPage.drawText(barIdMap[barId].name, {
+            x: (nameX * scaleX) + 70,
+            y: firstPage.getSize().height - (nameY * scaleY) - 10,
+            size: 12,
+            font,
+            color: rgb(0, 0, 0)
+        });
 
-    firstPage.drawText(barId, {
-        x: (nameX * scaleX) + 420,
-        y: firstPage.getSize().height - (nameY * scaleY) - 10,
-        size: 12,
-        font,
-        color: rgb(0, 0, 0)
-    });
+        firstPage.drawText(barId, {
+            x: (nameX * scaleX) + 420,
+            y: firstPage.getSize().height - (nameY * scaleY) - 10,
+            size: 12,
+            font,
+            color: rgb(0, 0, 0)
+        });
+    } else {
+        firstPage.drawRectangle({
+            x: (nameX * scaleX) + 70,
+            y: firstPage.getSize().height - (nameY * scaleY) - 12,
+            width: 250,
+            height: 20,
+            color: rgb(1, 1, 1)
+        });
+
+        firstPage.drawRectangle({
+            x: (nameX * scaleX) + 420,
+            y: firstPage.getSize().height - (nameY * scaleY) - 12,
+            width: 50,
+            height: 20,
+            color: rgb(1, 1, 1)
+        });
+    }
 
     if (court !== 'C') firstPage.drawText('Thomas Donovan', {
         x: (nameX * scaleX) + 40,

@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     );
 
     const subject = getConflictSubject(conflictType);
-    const body = generateBody(attyData.name, conflictType, reqJson.cases.map(c => c.caseInfo), filename);
+    const body = attyData ? generateBody(attyData.name, conflictType, reqJson.cases.map(c => c.caseInfo), filename) : '';
     const attachments = await Promise.all(reqJson.cases.map(async c => ({
         name: c.sheetFilename,
         data: Buffer.from(await modifyConflictPdf(barId, court, c.conflictSheet, c.duc)).toString('base64').replace(/(.{76})/g, "$1\n")
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     const eml = await generateEml({
         from: `"William McVay" <william.mcvay@delaware.gov>`,
-        to: [ attyData.emails.join('; '), courtEmails.join('; ') ].join('; '),
+        to: [ (attyData?.emails || []).join('; '), courtEmails.join('; ') ].join('; '),
         cc: attorneyData.find(a => a.barId === '3944')!.emails.join('; '),
         subject,
         body,
