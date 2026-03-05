@@ -2,7 +2,6 @@ import { decrypt, JICPayload } from "@/lib/session";
 import { Tn3270 } from "@/lib/Tn3270";
 import { convertDateJIC } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
-import React from "react";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path?: string[] }> }) {
     const attyId = (await params).path?.[0] ?? '4447';
@@ -33,7 +32,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     ]);
 
     const data = await client.read();
+    while (!data.some(l => l.includes('*** End of Data ***'))) {
+        await client.sendCommand('PF(8)');
+        data.push(...(await client.read()));
+    }
+
     await client.quit();
 
-    return NextResponse.json(data);
+    return NextResponse.json(data.filter(l => /^\s{1,2}\d{1,2}/.test(l)).map(l => l.slice(4)));
 }
