@@ -60,6 +60,20 @@ export default function DefDataCase({ caseInfo, attorneyList, assigned }: DefDat
                 setAssignedDate(new Date(new Date(assignedDate).getTime() + (24 * 60 * 60 * 1000)).toISOString().split('T')[0]);
                 e.preventDefault();
                 break;
+            case 'Tab':
+                console.log('!!');
+                if (e.shiftKey) return;
+                e.preventDefault();
+
+                const form = e.currentTarget.form;
+                if (!form) return;
+
+                const elements = Array.from(form.elements) as HTMLElement[];
+                const index = elements.indexOf(e.currentTarget);
+
+                const next = elements[index + 1];
+                next?.focus();
+                break;
         }
     }
 
