@@ -136,24 +136,42 @@ export default function ConflictCheck({ conflictResponse, conflictClientName, co
         const emlBlob = await emlBlobRes.blob();
         setConflictBlobs([{ blob: URL.createObjectURL(emlBlob), filename, duc: '3232' }]);
     }
+
+    function selectAOPC(i: number) {
+        const det = detailsRef.current[i];
+        if (det) det.open = true;
+        const el = aopcRef.current[i];
+        if (!el) return;
+
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+
+        const win = window.open('');
+        win?.document.writeln(`<pre>${el.innerText}</pre>`);
+        win?.print();
+        win?.close();
+    }
     
     return (
         <div className="w-full my-4 bg-white dark:bg-gray-700 shadow-lg rounded-lg">
             <h3 className="p-4 bg-linear-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-600 mb-1
                         shadow-md rounded-lg border-b border-gray-200 dark:border-gray-700 font-semibold
                         flex justify-between align-middle">
-                <span>{clientName} (SBI#: {sbi})</span>
+                { sbi && <span>{clientName} (SBI#: {sbi})</span>}
                 <div className="flex justify-between align-middle space-x-1">
-                    <img
+                    { sbi && <img
                         src='/icons/check.svg'
                         className="w-6 cursor-pointer"
                         onClick={searchPotentialConflicts}
-                    />
-                    <img
+                    /> }
+                    { sbi && <img
                         src='/icons/reset.svg'
                         className="w-6 cursor-pointer"
                         onClick={() => { setNames(''); setConflictResults([]) }}
-                    />
+                    /> }
                     <img
                         src='/icons/clear.svg'
                         className="w-6 cursor-pointer"
@@ -162,7 +180,7 @@ export default function ConflictCheck({ conflictResponse, conflictClientName, co
                 </div>
             </h3>
             
-            <textarea
+            { sbi && <textarea
                 id="names"
                 name="names"
                 rows={4}
@@ -173,7 +191,7 @@ export default function ConflictCheck({ conflictResponse, conflictClientName, co
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md
                             bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                             focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            ></textarea>
+            ></textarea> }
             <div className="w-full flex-col" onCopy={forceTextCopy}>
                 { conflictList.map((conflictCase, i) =>
                     <details
@@ -184,10 +202,11 @@ export default function ConflictCheck({ conflictResponse, conflictClientName, co
                     >
                         <summary className="flex cursor-pointer items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 dark:text-gray-200 rounded-lg">
                             <span className="cursor-text" onClick={e => e.preventDefault()}>
-                                <span className="mr-2" style={{ 'userSelect': 'none' }}>({{ C: 'CCP', S: 'SUP', F: 'FAM' }[conflictCase.court]})</span>
-                                <span className={!conflictCase.declared ? 'italic' : ''}>
+                                <span className="hover:opacity-80" style={{ userSelect: 'none' }}><img className="inline cursor-pointer mr-2 w-5 bg-gray-600 dark:bg-gray-800" alt="Print AOPC" title="Print AOPC" src='./icons/print-icon.png' onClick={() => selectAOPC(i)} /></span>
+                                { conflictCase.court !== '?' && <span className="mr-2" style={{ 'userSelect': 'none' }}>({{ C: 'CCP', S: 'SUP', F: 'FAM', '?': '' }[conflictCase.court]})</span> }
+                                { (conflictClientName || clientName) ? <span className={!conflictCase.declared ? 'italic' : ''}>
                                     {conflictClientName || clientName}: {conflictCase.duc} &ndash; {conflictCase.schedule}
-                                </span>
+                                </span> : <span>{conflictCase.duc}</span> }
                             </span>
                             <svg className="w-5 h-5 transition-transform group-open:rotate-180"
                                 fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -204,7 +223,7 @@ export default function ConflictCheck({ conflictResponse, conflictClientName, co
                 )}
             </div>
             { (conflictResults.length || '') && <ConflictViewer client={clientName} conflictResults={conflictResults} /> }
-            { (!conflictBlobs.length || '') && <form className="flex flex-col items-center w-full p-1 bg-white dark:bg-gray-700 shadow-lg rounded-lg">
+            { (!conflictBlobs.length && conflictResponse.sbi || '') && <form className="flex flex-col items-center w-full p-1 bg-white dark:bg-gray-700 shadow-lg rounded-lg">
                 <input
                     value={barId}
                     onChange={e => setBarId(e.target.value)}

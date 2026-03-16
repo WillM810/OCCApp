@@ -31,7 +31,7 @@ export type ConflictPayload = {
 
 export type ConflictCase = {
   declared: boolean;
-  court: 'C' | 'F' | 'S';
+  court: 'C' | 'F' | 'S' | '?';
   duc: string;
   schedule: string;
   status: string;
@@ -191,6 +191,32 @@ export default function Home() {
     if (!unassignedCasesList.length) setShowAllCasesAssigned(true);
   }
 
+  async function lookupAOPC() {
+    const caseNumbers = conflictCaseNumbers.replaceAll(' ', ',').split(',').filter(d => d).map(duc => duc.trim());
+    const activeJson = await caseNumbers.reduce(async (p, c) => {
+      const acc = await p;
+      const aopcRes = await fetch('/api/aopcLookup/' + c);
+      const aopcJSON = await aopcRes.json();
+      acc.push({
+        aopcScreen: aopcJSON,
+        court: "?",
+        declared: true,
+        duc: c,
+        schedule: '???',
+        sentenced: false,
+        status: 'A',
+        statusCode: 'A',
+      });
+      return acc;
+    }, Promise.resolve([] as ConflictCase[]));
+    setConflictResponse({
+      clientName: '',
+      court: '?',
+      sbi: '',
+      activeJson
+    });
+  }
+
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       
@@ -260,15 +286,25 @@ export default function Home() {
                   SC
                 </label>
               </div>
-              <button
-                disabled={!conflictEnabled}
-                type="submit"
-                className="w-full p-2 mb-4 rounded-md font-semibold
-                          bg-blue-600 text-white hover:bg-blue-700 transition duration-150
-                          disabled:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
-              >
-                { conflictFilesRef.current?.files?.length ? 'Begin Conflict Check' : 'Case Lookup' }
-              </button>
+              <div className="flex gap-2">
+                <button
+                  disabled={!conflictEnabled}
+                  type="submit"
+                  className="flex-1 p-2 mb-4 rounded-md font-semibold
+                            bg-blue-600 text-white hover:bg-blue-700 transition duration-150
+                            disabled:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
+                >
+                  { conflictFilesRef.current?.files?.length ? 'Begin Conflict Check' : 'Case Lookup' }
+                </button>
+                <button
+                  disabled={!conflictEnabled}
+                  onClick={ () => lookupAOPC() }
+                  type="button"
+                  className="flex-1 p-2 mb-4 rounded-md font-semibold
+                            bg-blue-600 text-white hover:bg-blue-700 transition duration-150
+                            disabled:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
+                >AOPC Lookup</button>
+              </div>
             </form>
         }
         { (unassignedCasesList.length || '') &&
