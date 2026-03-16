@@ -325,7 +325,7 @@ export class DefenderDataClient {
         ) as DDBasicResult[];
 
         const attorneys = jsonData
-            .filter(caseRow => !caseRow.Attorney.includes('UNASSIGNED'))
+            .filter(caseRow => !caseRow.Attorney.includes('UNASSIGNED') && caseRow.Status !== 'Closed')
             .reduce((p, c) => {
                 p[c.Attorney] = [...(p[c.Attorney] || []), `${c.DUC}(${c.Type[0]}/${c.Status})`];
                 return p;
