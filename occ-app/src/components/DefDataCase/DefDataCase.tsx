@@ -61,7 +61,6 @@ export default function DefDataCase({ caseInfo, attorneyList, assigned }: DefDat
                 e.preventDefault();
                 break;
             case 'Tab':
-                console.log('!!');
                 if (e.shiftKey) return;
                 e.preventDefault();
 
