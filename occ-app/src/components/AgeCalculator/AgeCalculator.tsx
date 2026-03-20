@@ -24,36 +24,20 @@ const dateInputStyles = [
 ].join(' ');
 
 export default function AgeCalculator() {
-    const [age, setAge] = useState('');
-
-    function updateAge(e: ChangeEvent<HTMLInputElement>) {
-        const targetDate = new Date(`${e.target.value}T00:00:00`);
-        const msPerYear = 1000 * 60 * 60 * 24 * 365.25;
-        const deltaTime = Date.now() - targetDate.getTime();
-        if (!e.target.value) setAge('');
-        else setAge(Math.floor(deltaTime / msPerYear).toString());
-    }
-
-    function handleDelete(e: React.KeyboardEvent) {
-        if (e.key === 'Delete') (e.target as HTMLInputElement).value = '';
-        updateAge({ target: { value: (e.target as HTMLInputElement).value } } as ChangeEvent<HTMLInputElement>);
-    }
-
-    function handlePaste(e: React.ClipboardEvent) {
-        if (isNaN(new Date(e.clipboardData.getData('text')).getTime())) return;
-        (e.target as HTMLInputElement).value = new Date(e.clipboardData.getData('text')).toISOString().split('T')[0];
-        updateAge({ target: { value: (e.target as HTMLInputElement).value } } as ChangeEvent<HTMLInputElement>);
-    }
-
     return (
         <div className="w-2/5 flex items-center space-x-4">
-            <input className={dateInputStyles}
-                type="date" onChange={updateAge}
-                onKeyDown={handleDelete}
-                onPaste={handlePaste}
-            />
-            <span className={"grow text-center" + (parseInt(age) < 18 ? " text-red-600" : " text-green-600")}>
-                {age && isFinite(parseInt(age)) && (parseInt(age) < 18 ? `${age}, JUVENILE` : `${age}, ADULT`)}
+            <span className={"grow text-center italic font-bold"}>
+                JUVENILE DOB AFTER: {
+                    new Date(
+                        new Date().getFullYear() - 18,
+                        new Date().getMonth(),
+                        new Date().getDate()
+                    ).toLocaleDateString("en-US", {
+                        month: "2-digit",
+                        day: "2-digit",
+                        year: "2-digit"
+                    })
+                }
             </span>
         </div>
     )
