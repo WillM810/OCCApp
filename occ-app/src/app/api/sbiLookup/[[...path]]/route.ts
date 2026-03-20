@@ -24,7 +24,7 @@ async function doSbiLookup(request: NextRequest, { params }: { params: Promise<{
     const paramValues = await params;
     const reqPayload = await safeJson(request);
     const court = (paramValues.path?.[0] || reqPayload.court)[0].toUpperCase();
-    const duc = paramValues.path?.[1] || reqPayload.duc;
+    const duc = paramValues.path?.[1] || reqPayload.duc as string;
 
     await client.runCommands([
         `String("jic")`,
@@ -35,8 +35,7 @@ async function doSbiLookup(request: NextRequest, { params }: { params: Promise<{
         `Enter()`,
         `String("cs")`,
         `Enter()`,
-        `String("${duc}")`,
-        `Tab()`,
+        `String("${duc.length > 10 ? duc : duc + ' '}")`,
         `String("${court}")`,
         `String("k")`,
         `Enter()`,
