@@ -57,3 +57,5 @@ next-env.d.ts
 
 /POCs/data
 /POCs/*.pdf
+
+/occ-app/data
