@@ -8,3 +8,11 @@ export function readFile(file: string) {
         return {};
     }
 }
+
+export function writeFile(file: string, data: Object) {
+    try {
+        fs.writeFileSync(process.cwd() + '/data/' + file, JSON.stringify(data, null, 2));
+    } catch (e) {
+        console.error(e);
+    }
+}
