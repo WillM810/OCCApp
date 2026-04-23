@@ -127,7 +127,7 @@ export default function ConflictCheck({ conflictResponse, conflictClientName, co
                     duc: email.duc,
                     conflictSheet: Buffer.from(email.conflictSheetArrayBuffer).toString('base64'),
                     sheetFilename: `${conflictClientName || clientName} - ${email.duc}.pdf`,
-                    caseInfo: `${conflictClientName || clientName}: ${email.duc} – ${conflictList.find(c => c.duc === email.duc)!.schedule}`
+                    caseInfo: `${conflictClientName || clientName}: ${email.duc} – ${(conflictList.find(c => c.duc === email.duc)?.schedule || 'NONE')}`
                 })),
                 filename
             })
