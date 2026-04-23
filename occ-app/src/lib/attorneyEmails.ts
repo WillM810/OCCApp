@@ -1,6 +1,6 @@
-import { readFile } from "./filePersistance";
+import { readDataFile } from "./filePersistance";
 
-export const attorneyData = readFile('contacts/attorneys.json');
-export const ccpEmails = readFile('contacts/ccp.json');
-export const fcEmails = readFile('contacts/fam.json');
-export const scEmails = readFile('contacts/sup.json');
+export const attorneyData = readDataFile('contacts/attorneys.json');
+export const ccpEmails = readDataFile('contacts/ccp.json');
+export const fcEmails = readDataFile('contacts/fam.json');
+export const scEmails = readDataFile('contacts/sup.json');

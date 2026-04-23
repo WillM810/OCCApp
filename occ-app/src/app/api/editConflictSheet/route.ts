@@ -7,11 +7,12 @@ import { readFile, unlink, writeFile } from "fs/promises";
 import { promisify } from "util";
 import { execFile } from "child_process";
 import { attorneyData } from "@/lib/attorneyEmails";
+import { AttorneyData, readDataFile } from "@/lib/filePersistance";
 
 const execFileAsync = promisify(execFile);
 const QPDF = "C:\\Users\\william.mcvay\\Downloads\\OCCApp\\qpdf\\bin\\qpdf.exe";
 
-export const barIdMap = Object.fromEntries(attorneyData.map(atty => [atty.barId, atty]));
+export const barIdMap = Object.fromEntries((readDataFile('contacts/attorneys.json') as AttorneyData[]).map(atty => [atty.barId, atty]));
 
 function parsePdf(data: ArrayBuffer): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -98,7 +99,7 @@ export async function modifyConflictPdf(barId: string, court: string, conflictSh
         });
     }
 
-    if (court !== 'C') firstPage.drawText('Thomas Donovan', {
+    if (court !== 'C') firstPage.drawText('Christopher Tease', {
         x: (nameX * scaleX) + 40,
         y: firstPage.getSize().height - (nameY * scaleY) - 32,
         size: 12,

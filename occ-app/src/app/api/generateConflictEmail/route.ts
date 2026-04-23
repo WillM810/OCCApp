@@ -1,9 +1,10 @@
-import { attorneyData, ccpEmails, fcEmails, scEmails } from "@/lib/attorneyEmails";
+import { ccpEmails, fcEmails, scEmails } from "@/lib/attorneyEmails";
 import { ConflictType, generateBody, generateEml, getConflictSubject } from "@/lib/emlGenerator";
 import { NextRequest, NextResponse } from "next/server";
 import { modifyConflictPdf } from "../editConflictSheet/route";
 import { Tn3270 } from "@/lib/Tn3270";
 import { decrypt, JICPayload } from "@/lib/session";
+import { AttorneyData, readDataFile } from "@/lib/filePersistance";
 
 type EMLCaseData = {
     duc: string;
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
     const { barId, court, filename } = reqJson;
 
     const conflictType = { 'C': 'ccp', 'S': 'sup', 'F': 'fam' }[court]! as ConflictType;
-    const attyData = attorneyData.find(a => a.barId === barId)!;
+    const attyData = (readDataFile('contacts/attorneys.json') as AttorneyData[]).find(a => a.barId === barId)!;
     const courtEmails = (conflictType === 'ccp' ?
         ccpEmails :
         (conflictType === 'fam' ?
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     const eml = await generateEml({
         from: `"William McVay" <william.mcvay@delaware.gov>`,
         to: [ (attyData?.emails || []).join('; '), courtEmails.join('; ') ].join('; '),
-        cc: attorneyData.find(a => a.barId === '3944')!.emails.join('; '),
+        cc: (readDataFile('contacts/attorneys.json') as AttorneyData[]).find(a => a.barId === '3547')!.emails.join('; '),
         subject,
         body,
         signatureLogo: './src/assets/sigLogo.png',
