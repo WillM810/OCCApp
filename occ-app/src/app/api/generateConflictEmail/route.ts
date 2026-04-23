@@ -1,4 +1,4 @@
-import { ccpEmails, fcEmails, scEmails } from "@/lib/attorneyEmails";
+import { getCcpEmails, getFcEmails, getScEmails } from "@/lib/attorneyEmails";
 import { ConflictType, generateBody, generateEml, getConflictSubject } from "@/lib/emlGenerator";
 import { NextRequest, NextResponse } from "next/server";
 import { modifyConflictPdf } from "../editConflictSheet/route";
@@ -26,13 +26,11 @@ export async function POST(request: NextRequest) {
 
     const conflictType = { 'C': 'ccp', 'S': 'sup', 'F': 'fam' }[court]! as ConflictType;
     const attyData = (readDataFile('contacts/attorneys.json') as AttorneyData[]).find(a => a.barId === barId)!;
-    const courtEmails = (conflictType === 'ccp' ?
-        ccpEmails :
-        (conflictType === 'fam' ?
-            fcEmails :
-            scEmails
-        )
-    );
+    const courtEmails = {
+        'ccp': getCcpEmails,
+        'fam': getFcEmails,
+        'sup': getScEmails,
+    }[conflictType]();
 
     const subject = getConflictSubject(conflictType);
     const body = attyData ? generateBody(attyData.name, conflictType, reqJson.cases.map(c => c.caseInfo), filename) : '';
