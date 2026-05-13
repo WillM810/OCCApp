@@ -1,5 +1,5 @@
 import { Tn3270 } from "@/lib/Tn3270";
-import { DefenderDataClient } from "@/lib/defenderDataClient";
+import { DefenderDataClient } from "@/lib/ddClient/defenderDataClient";
 import { decrypt, JICPayload } from "@/lib/session";
 import { convertDateJIC } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
@@ -102,7 +102,9 @@ export async function POST(request: NextRequest) {
         ]);
 
         const scheduleScreen = await client.read();
-        const eventLines = scheduleScreen.filter(l => /^\s+\d{1,2}\s\w+\s+\d{2}\/\d{2}\/\d{4}(?:\s\w)?\s+$/.test(l));
+        const eventLines = scheduleScreen.filter(l => /^\s+\d{1,2}\s\w+\s+\d{2}\/\d{2}\/\d{4}(?:\s\w+)?\s*?$/.test(l));
+        //@ts-ignore
+        currentCase['data'] = { scheduleScreen, eventLines };
         if (eventLines.length) currentCase.schedule = eventLines[0].substring(4, 21);
 
         await client.sendCommand('PF(2)');

@@ -1,4 +1,4 @@
-import { DDRequestError, DefenderDataClient } from "@/lib/defenderDataClient";
+import { DDRequestError, DefenderDataClient } from "@/lib/ddClient/defenderDataClient";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {

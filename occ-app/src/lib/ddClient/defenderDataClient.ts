@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DDPayload, decrypt, encrypt } from "./session";
-import httpsRequest from "./httpsRequest";
+import { DDPayload, decrypt, encrypt } from "../session";
+import httpsRequest from "../httpsRequest";
+import { DDUtils } from "./ddUtils";
 
 export type ddRequestOptions = {
     hostname: 'myjw.com';
@@ -258,12 +259,12 @@ export class DefenderDataClient {
 
         const attorneyRegEx = /"attorney_id" fieldValue="(\d*)">(?:.|\s)*?"attorney_name".*?>(.*?)</g;
         const attorneysList = [];
-        
+
         let attorneyDataMatch: RegExpExecArray | null;
         while (attorneyDataMatch = attorneyRegEx.exec(attorneysHTML)) {
             attorneysList.push({ attorney_id: attorneyDataMatch[1], attorney_name: attorneyDataMatch[2] });
         }
-        
+
         return attorneysList;
     }
 
@@ -273,6 +274,21 @@ export class DefenderDataClient {
         this.sessionOptions.headers["Content-type"] = 'application/json';
         if (resData.statusCode === 200) return { status: 'ok' };
         else throw { error: resData.body, status: 500 };
+    }
+
+    async getAttorneyCaseCount(params: { path?: string[] }) {
+        const pathParams = params.path || [];
+        const reqBody = {
+            "params": [
+                DDUtils.attorneyByIdParam(pathParams[0]),
+                DDUtils.countySearchParam('K'), 
+                DDUtils.courtSearchParam('CCP', 'K'),
+                DDUtils.openedAfterParam(new Date('7/1/2025')),
+            ]
+        };
+        const resData = await this.request('PUT', '/recordset/layout/7479', reqBody);
+
+        return JSON.parse(resData.body.toString('utf8'))[0];
     }
 
     async sbiSearch({ sbi }: { sbi: string }) {

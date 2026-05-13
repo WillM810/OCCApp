@@ -1,6 +1,6 @@
 import { decrypt } from "@/lib/session";
 import { NextRequest, NextResponse } from "next/server";
-import { DefenderDataClient } from "@/lib/defenderDataClient";
+import { DefenderDataClient } from "@/lib/ddClient/defenderDataClient";
 import { LoginState } from "@/app/page";
 
 export async function GET(request: NextRequest) {
