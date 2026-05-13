@@ -47,7 +47,6 @@ export class DDUtils {
     }
 
     static openedAfterParam(date: Date) {
-        console.log(date.toLocaleDateString())
         return {
             "fieldName": "opened_from",
             "fieldValue": date.toLocaleDateString(),
