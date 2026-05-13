@@ -65,7 +65,7 @@ export default function LoginPanel({ loginUseState, statusLoading }: LoginPanelP
             <div className="p-4 bg-linear-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-600
                             shadow-md rounded-b-xl border-b border-gray-200 dark:border-gray-700">
                 <h1 className="flex items-center justify-between text-2xl font-bold text-gray-900 dark:text-white">
-                    <span className="tracking-tight">Login</span>
+                    <span className="tracking-tight">{Object.values(loginState).some(v => !v) ? 'Login' : 'Logout'}</span>
                     <div className="flex items-center space-x-3 ml-4">
                         { loginState.dd && <img src="./icons/dd.svg" className="w-8 cursor-pointer" onClick={ e => logout('DD') } /> }
                         { loginState.sc && <img src="./icons/sc.svg" className="w-8 cursor-pointer" onClick={ e => logout('S_JIC') } /> }
