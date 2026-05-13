@@ -70,13 +70,14 @@ export default function LoginForm({ title, fieldPrefix, loginUpdate }: LoginForm
 
   return (
     <div className={formStyleClasses}>
-      <form onSubmit={doLogin} className="space-y-4">
+      <form id={fieldPrefix+'_login'} onSubmit={doLogin} className="space-y-4">
         <h3 className={headerStyleClasses}>{title} Login</h3>
         <div>
           <input
             placeholder={`${title} Username`}
             name={`${fieldPrefix}_username`}
             className={fieldStyleClasses}
+            autoComplete={`section-${fieldPrefix} username`}
             required
           />
         </div>
@@ -86,6 +87,7 @@ export default function LoginForm({ title, fieldPrefix, loginUpdate }: LoginForm
             placeholder={`${title} Password`}
             name={`${fieldPrefix}_password`}
             className={fieldStyleClasses}
+            autoComplete={`section-${fieldPrefix} current-password`}
             required
           />
         </div>
