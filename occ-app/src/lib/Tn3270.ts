@@ -15,15 +15,15 @@ export class Tn3270 {
     waitingForOutput: boolean = false;
     cmdPromise!: deferred | null;
     ready!: Promise<void | string[]>;
-    verbose: boolean = true;
+    verbose: boolean;
 
-    static async connect(verbose: boolean = true): Promise<Tn3270> {
+    static async connect(verbose: boolean = false): Promise<Tn3270> {
         const client = new Tn3270(verbose);
         await client.ready;
         return client;
     }
 
-    constructor(verbose: boolean = true) {
+    constructor(verbose: boolean = false) {
         this.verbose = verbose;
         this.s3270process = spawn(s3270exe, s3270args);
         if (this.verbose) console.log('Spawned emulator client');
