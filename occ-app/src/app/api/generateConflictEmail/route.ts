@@ -49,7 +49,50 @@ export async function POST(request: NextRequest) {
         attachments,
     });
 
-    if (conflictType === 'fam') {
+    if (conflictType === 'sup') {
+        const authCookie = request.cookies.get('S_JIC')?.value;
+        if (!authCookie)
+            return NextResponse.json({ message: 'JIC login cookie not found' }, { status: 401 });
+
+        const authData = await decrypt(authCookie) as JICPayload;
+        if (!authData || !authData.user)
+            return NextResponse.json({ message: 'Invalid JIC login cookie' }, { status: 401 });
+
+        const client = await Tn3270.connect();
+        const loginStatus = await client.login('jic', authData.user, authData.pw);
+        if (loginStatus === 'fail' || loginStatus === 'logged')
+            return NextResponse.json({ message: 'JIC login failed', loginStatus }, { status: 401 });
+
+        await client.runCommands([
+            `String("jic")`,
+            `Enter()`,
+            `String("x")`,
+            `Enter()`,
+            `String("1")`,
+            `Enter()`,
+            `String("aaa")`,
+            `Enter()`,            
+        ]);
+
+        await reqJson.cases.reduce(async (p, caseInfo) => {
+            await p;
+            return await client.runCommands([
+                `String("${caseInfo.duc})`,
+                `Tab()`,
+                `Tab()`,
+                `String("k")`,
+                `Tab()`,
+                `String("00${barId}")`,
+                `Tab()`,
+                `Tab()`,
+                `String("ctratt")`,
+                `Enter()`,
+                `PF(4)`,
+            ]) as string[];
+        }, Promise.resolve([] as string[]));
+
+        await client.quit();
+    } else if (conflictType === 'fam') {
         const authCookie = request.cookies.get('F_JIC')?.value;
         if (!authCookie)
             return NextResponse.json({ message: 'JIC login cookie not found' }, { status: 401 });
