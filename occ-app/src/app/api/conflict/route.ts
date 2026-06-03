@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
 
 async function resetClient(client: Tn3270, authData: JICPayload) {
     await client.quit();
-    const nClient = await Tn3270.connect(true);
+    const nClient = await Tn3270.connect(client.verbose);
     await nClient.login('cjis1', authData.user, authData.pw);
     
     await nClient.runCommands([
