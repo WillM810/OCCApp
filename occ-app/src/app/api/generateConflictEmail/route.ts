@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         if (!authData || !authData.user)
             return NextResponse.json({ message: 'Invalid JIC login cookie' }, { status: 401 });
 
-        const client = await Tn3270.connect(true);
+        const client = await Tn3270.connect();
         const loginStatus = await client.login('jic', authData.user, authData.pw);
         if (loginStatus === 'fail' || loginStatus === 'logged')
             return NextResponse.json({ message: 'JIC login failed', loginStatus }, { status: 401 });
